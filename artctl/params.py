@@ -76,7 +76,9 @@ def _coerce_int(name, value):
     try:
         return int(value, 10)
     except ValueError:
-        raise ParameterError("Parameter '{0}' expects an integer. Received '{1}'.".format(name, value))
+        raise ParameterError(
+            f"Parameter '{name}' expects an integer. Received '{value}'."
+        )
 
 
 def _coerce_float(name, value):

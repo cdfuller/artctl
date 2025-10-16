@@ -222,12 +222,13 @@ def handle_run(args):
         print("Generator exited with status {0}.".format(exit_status), file=sys.stderr)
         return EXIT_INTERNAL_ERROR
 
-    if output_manager.output_is_required(entry) and not output_manager.verify_output(entry, output_path):
-        print(
-            "Expected output was not produced at {0}.".format(output_path),
-            file=sys.stderr,
-        )
-        return 4
+    if output_manager.output_is_required(entry):
+        if not output_manager.verify_output(entry, output_path):
+            print(
+                f"Expected output was not produced at {output_path}.",
+                file=sys.stderr,
+            )
+            return 4
 
     print("Run completed successfully.")
     return EXIT_SUCCESS

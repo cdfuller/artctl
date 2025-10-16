@@ -15,7 +15,7 @@ def execute(command, working_dir=None):
             cwd=working_dir,
             check=False,
         )
-    except FileNotFoundError as exc:
+    except FileNotFoundError:
         executable = command[0] if command else ""
         raise RunnerError(
             "Executable not found: {0}. Install the required runtime.".format(executable)

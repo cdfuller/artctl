@@ -1,3 +1,4 @@
+# Example Node generator entry. Requires Node.js to be installed locally.
 name: night_sky
 description: Renders a placeholder night sky PNG using Node.
 runtime: node
