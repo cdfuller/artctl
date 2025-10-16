@@ -4,6 +4,7 @@ import argparse
 import sys
 
 from . import __version__
+from . import params
 from . import registry
 
 EXIT_SUCCESS = 0
@@ -170,11 +171,20 @@ def handle_run(args):
         print("Program '{0}' not found in registry.".format(program), file=sys.stderr)
         return EXIT_VALIDATION_ERROR
 
+    try:
+        override_map = params.parse_overrides(args.overrides, entry.get("params", []))
+    except params.ParameterError as exc:
+        print("Parameter error: {0}".format(exc), file=sys.stderr)
+        return EXIT_VALIDATION_ERROR
+
     print("Execution pipeline for '{0}' is not implemented yet.".format(program))
+    print("Resolved parameters:")
+    for name in entry.get("params", []):
+        param_name = name["name"]
+        value = override_map.get(param_name)
+        print("  - {0}: {1}".format(param_name, value))
     print("Command template preview:")
     print("  {0}".format(" ".join(entry["command"])))
-    if args.overrides:
-        print("Overrides provided: {0}".format(", ".join(args.overrides)))
     if args.dry_run:
         print("Dry run requested; command will not execute until Milestone M6.")
     return EXIT_SUCCESS

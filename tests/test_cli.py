@@ -55,6 +55,7 @@ def test_help_subcommand(tmp_path, capsys):
     assert "Name: spiral" in captured.out
     assert "Parameters:" in captured.out
     assert "Source:" in captured.out
+    assert "turns: 20" not in captured.out
 
 
 def test_run_subcommand_reports_placeholder(tmp_path, capsys):
@@ -73,8 +74,9 @@ def test_run_subcommand_reports_placeholder(tmp_path, capsys):
     captured = capsys.readouterr()
     assert exit_code == cli.EXIT_SUCCESS
     assert "Execution pipeline for 'spiral' is not implemented yet." in captured.out
-    assert "Overrides provided: turns=10" in captured.out
+    assert "Resolved parameters:" in captured.out
     assert "Dry run requested" in captured.out
+    assert "turns: 10" in captured.out
 
 
 def test_help_for_unknown_program(tmp_path, capsys):
