@@ -12,7 +12,7 @@ def write_registry(tmp_path):
         entrypoint: generators/spiral.py
         command:
           - python3
-          - generators/spiral.py
+          - "{entrypoint}"
           - --turns
           - "{params.turns}"
         params:
@@ -77,6 +77,7 @@ def test_run_subcommand_reports_placeholder(tmp_path, capsys):
     assert "Resolved parameters:" in captured.out
     assert "Dry run requested" in captured.out
     assert "turns: 10" in captured.out
+    assert "python3 generators/spiral.py --turns 10" in captured.out
 
 
 def test_help_for_unknown_program(tmp_path, capsys):

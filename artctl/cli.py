@@ -6,6 +6,7 @@ import sys
 from . import __version__
 from . import params
 from . import registry
+from . import templater
 
 EXIT_SUCCESS = 0
 EXIT_INTERNAL_ERROR = 1
@@ -183,10 +184,20 @@ def handle_run(args):
         param_name = name["name"]
         value = override_map.get(param_name)
         print("  - {0}: {1}".format(param_name, value))
-    print("Command template preview:")
-    print("  {0}".format(" ".join(entry["command"])))
+    try:
+        rendered_command = templater.render_command(
+            entry,
+            override_map,
+        )
+    except templater.TemplateError as exc:
+        print("Template error: {0}".format(exc), file=sys.stderr)
+        return EXIT_VALIDATION_ERROR
+
+    print("Command preview:")
+    print("  {0}".format(" ".join(rendered_command)))
     if args.dry_run:
         print("Dry run requested; command will not execute until Milestone M6.")
+    return EXIT_SUCCESS
     return EXIT_SUCCESS
 
 
