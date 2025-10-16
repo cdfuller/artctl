@@ -1,0 +1,25 @@
+[project]
+name = "artctl"
+version = "0.1.0"
+description = "CLI for running generative art via a YAML registry"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+  "PyYAML>=6.0"
+]
+
+[project.scripts]
+artctl = "artctl.cli:main"
+
+[build-system]
+requires = ["hatchling>=1.26"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = [
+  "pytest>=8",
+  "ruff>=0.5"
+]
+
+[tool.uv]
+default-groups = ["dev"]

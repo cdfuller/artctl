@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+
+# Virtual environments
+.venv/
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Tooling
+uv.lock
+.ruff_cache/
+.pytest_cache/
+.coverage
+
+# Editors & OS
+.DS_Store
+.vscode/
+.idea/
+
+# Node/npm (for cross-runtime generators)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Generated outputs
+outputs/
+!outputs/.gitkeep
