@@ -1,5 +1,7 @@
 import textwrap
 
+import pytest
+
 import artctl.cli as cli
 
 
@@ -16,6 +18,16 @@ class StubOutputPath:
             "params_values": params_values,
         })
         return self.path
+
+
+class StubVerifyOutput:
+    def __init__(self, should_exist=True):
+        self.should_exist = should_exist
+        self.calls = []
+
+    def __call__(self, entry, path):
+        self.calls.append({"entry": entry, "path": path})
+        return self.should_exist
 
 
 def write_registry(tmp_path):
@@ -110,3 +122,61 @@ def test_help_for_unknown_program(tmp_path, capsys):
     captured = capsys.readouterr()
     assert exit_code == cli.EXIT_VALIDATION_ERROR
     assert "Program 'unknown' not found" in captured.err
+def test_run_with_missing_param_reports_error(tmp_path, capsys):
+    write_registry(tmp_path)
+    exit_code = cli.main([
+        "--registry-path",
+        str(tmp_path),
+        "run",
+        "spiral",
+        "--set",
+        "unknown=1",
+    ])
+    captured = capsys.readouterr()
+    assert exit_code == cli.EXIT_VALIDATION_ERROR
+    assert "Unknown parameter" in captured.err
+
+
+def test_run_with_missing_entrypoint(tmp_path, capsys):
+    write_registry(tmp_path)
+    stub_output = StubOutputPath("/tmp/fixed/path.png")
+    original_output = cli.output_manager.build_output_path
+    try:
+        cli.output_manager.build_output_path = stub_output
+        exit_code = cli.main([
+            "--registry-path",
+            str(tmp_path),
+            "run",
+            "spiral",
+        ])
+    finally:
+        cli.output_manager.build_output_path = original_output
+    captured = capsys.readouterr()
+    assert exit_code == cli.EXIT_INTERNAL_ERROR
+    assert "Execution error" in captured.err
+
+
+def test_run_reports_missing_output(tmp_path, capsys):
+    write_registry(tmp_path)
+    stub_output = StubOutputPath("/tmp/fixed/path.png")
+    stub_verify = StubVerifyOutput(should_exist=False)
+    original_output = cli.output_manager.build_output_path
+    original_verify = cli.output_manager.verify_output
+    original_execute = cli.runner.execute
+    try:
+        cli.output_manager.build_output_path = stub_output
+        cli.output_manager.verify_output = stub_verify
+        cli.runner.execute = lambda command, working_dir=None: 0
+        exit_code = cli.main([
+            "--registry-path",
+            str(tmp_path),
+            "run",
+            "spiral",
+        ])
+    finally:
+        cli.output_manager.build_output_path = original_output
+        cli.output_manager.verify_output = original_verify
+        cli.runner.execute = original_execute
+    captured = capsys.readouterr()
+    assert exit_code == 4
+    assert "Expected output was not produced" in captured.err

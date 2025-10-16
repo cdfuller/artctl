@@ -103,3 +103,14 @@ def _render_output_template(template, entry, params_values, now):
         output = output.replace(token, str(params_values[param_name]))
 
     return output
+
+
+def output_is_required(entry):
+    output_config = entry.get("output") or {}
+    return bool(output_config.get("required"))
+
+
+def verify_output(entry, path):
+    if not output_is_required(entry):
+        return True
+    return os.path.exists(path)
