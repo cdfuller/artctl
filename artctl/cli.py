@@ -8,6 +8,7 @@ from . import output_manager
 from . import params
 from . import registry
 from . import templater
+from . import runner
 
 EXIT_SUCCESS = 0
 EXIT_INTERNAL_ERROR = 1
@@ -206,8 +207,22 @@ def handle_run(args):
     print("  {0}".format(" ".join(rendered_command)))
     print("Output path:")
     print("  {0}".format(output_path))
+
     if args.dry_run:
         print("Dry run requested; command will not execute until Milestone M6.")
+        return EXIT_SUCCESS
+
+    try:
+        exit_status = runner.execute(rendered_command)
+    except runner.RunnerError as exc:
+        print("Execution error: {0}".format(exc), file=sys.stderr)
+        return EXIT_INTERNAL_ERROR
+
+    if exit_status != 0:
+        print("Generator exited with status {0}.".format(exit_status), file=sys.stderr)
+        return EXIT_INTERNAL_ERROR
+
+    print("Run completed successfully.")
     return EXIT_SUCCESS
     return EXIT_SUCCESS
 
