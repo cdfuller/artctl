@@ -4,6 +4,7 @@ import argparse
 import sys
 
 from . import __version__
+from . import registry
 
 EXIT_SUCCESS = 0
 EXIT_INTERNAL_ERROR = 1
@@ -77,26 +78,105 @@ def build_parser():
 
 
 def handle_list(args):
-    """Placeholder list handler for early milestones."""
-    print("list is not implemented yet. Stay tuned for milestone M2.")
+    """List available registry entries."""
+    try:
+        entries = registry.load_registry(args.registry_path)
+    except registry.RegistryError as exc:
+        print("Registry error: {0}".format(exc), file=sys.stderr)
+        return EXIT_VALIDATION_ERROR
+
+    if not entries:
+        print("No registry entries found in {0}.".format(args.registry_path))
+        return EXIT_SUCCESS
+
+    for name in sorted(entries):
+        entry = entries[name]
+        description = entry.get("description", "").strip()
+        print("- {0}: {1}".format(name, description))
     return EXIT_SUCCESS
 
 
 def handle_help(args):
-    """Placeholder help handler for early milestones."""
+    """Show details for a specific registry entry."""
+    try:
+        entries = registry.load_registry(args.registry_path)
+    except registry.RegistryError as exc:
+        print("Registry error: {0}".format(exc), file=sys.stderr)
+        return EXIT_VALIDATION_ERROR
+
     program = args.program
-    print("help for '{0}' is not implemented yet. Coming with registry loader.".format(program))
+    entry = entries.get(program)
+    if not entry:
+        print("Program '{0}' not found in registry.".format(program), file=sys.stderr)
+        return EXIT_VALIDATION_ERROR
+
+    print("Name: {0}".format(entry["name"]))
+    print("Description: {0}".format(entry["description"]))
+    print("Runtime: {0}".format(entry["runtime"]))
+    print("Entrypoint: {0}".format(entry["entrypoint"]))
+    print("Command template:")
+    print("  {0}".format(" ".join(entry["command"])))
+
+    params = entry.get("params", [])
+    if params:
+        print("Parameters:")
+        for param in params:
+            default = param.get("default")
+            required = "required" if param.get("required") else "optional"
+            summary = "{0} ({1}, {2})".format(param["name"], param["type"], required)
+            if default is not None:
+                summary += ", default={0}".format(default)
+            if param.get("choices"):
+                summary += ", choices={0}".format(param["choices"])
+            if param.get("help"):
+                summary += " - {0}".format(param["help"])
+            print("  - {0}".format(summary))
+    else:
+        print("Parameters: none")
+
+    output = entry.get("output")
+    if output:
+        print("Output expectations:")
+        if output.get("required"):
+            print("  - Output is required.")
+        if output.get("path_template"):
+            print("  - Path template: {0}".format(output["path_template"]))
+        if output.get("extension"):
+            print("  - Extension: .{0}".format(output["extension"]))
+    else:
+        print("Output expectations: none")
+
+    tags = entry.get("tags") or []
+    if tags:
+        print("Tags: {0}".format(", ".join(tags)))
+    else:
+        print("Tags: none")
+
+    print("Source: {0}".format(entry.get("source_path")))
     return EXIT_SUCCESS
 
 
 def handle_run(args):
-    """Placeholder run handler for early milestones."""
+    """Validate registry entry prior to execution (implementation pending)."""
+    try:
+        entries = registry.load_registry(args.registry_path)
+    except registry.RegistryError as exc:
+        print("Registry error: {0}".format(exc), file=sys.stderr)
+        return EXIT_VALIDATION_ERROR
+
     program = args.program
+    entry = entries.get(program)
+    if not entry:
+        print("Program '{0}' not found in registry.".format(program), file=sys.stderr)
+        return EXIT_VALIDATION_ERROR
+
+    print("Execution pipeline for '{0}' is not implemented yet.".format(program))
+    print("Command template preview:")
+    print("  {0}".format(" ".join(entry["command"])))
+    if args.overrides:
+        print("Overrides provided: {0}".format(", ".join(args.overrides)))
     if args.dry_run:
-        prefix = "Dry run"
-    else:
-        prefix = "Run"
-    print("{0} for '{1}' is not implemented yet. Execution arrives in later milestones.".format(prefix, program))
+        print("Dry run requested; command will not execute until Milestone M6.")
     return EXIT_SUCCESS
 
 
