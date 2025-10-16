@@ -73,6 +73,13 @@ def _expand_token(token, registry_entry, params_values, project_root, consumed):
         consumed.add(param_name)
         return str(params_values[param_name])
 
+    if (token.startswith('"') and token.endswith('"')) or (
+        token.startswith("'") and token.endswith("'")
+    ):
+        inner = token[1:-1]
+        if "{" not in inner and "}" not in inner:
+            token = inner
+
     return token
 
 

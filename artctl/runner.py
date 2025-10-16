@@ -16,7 +16,10 @@ def execute(command, working_dir=None):
             check=False,
         )
     except FileNotFoundError as exc:
-        raise RunnerError("Command not found: {0}".format(exc))
+        executable = command[0] if command else ""
+        raise RunnerError(
+            "Executable not found: {0}. Install the required runtime.".format(executable)
+        )
     except OSError as exc:
         raise RunnerError("Failed to execute command: {0}".format(exc))
 

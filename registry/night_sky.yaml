@@ -1,0 +1,28 @@
+name: night_sky
+description: Renders a placeholder night sky PNG using Node.
+runtime: node
+entrypoint: generators/night_sky.js
+command:
+  - node
+  - generators/night_sky.js
+  - --output
+  - "{output}"
+  - --stars
+  - "{params.stars}"
+  - --palette
+  - "{params.palette}"
+params:
+  - name: stars
+    type: int
+    default: 120
+    help: Number of stars to simulate.
+  - name: palette
+    type: string
+    default: deep_blue
+    help: Color palette to use when rendering.
+output:
+  required: true
+  extension: png
+tags:
+  - example
+  - node

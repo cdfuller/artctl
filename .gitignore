@@ -33,3 +33,7 @@ yarn-error.log*
 # Generated outputs
 outputs/
 !outputs/.gitkeep
+
+inputs/
+!inputs/.gitkeep
+
