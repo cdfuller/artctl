@@ -4,6 +4,7 @@ import argparse
 import sys
 
 from . import __version__
+from . import output_manager
 from . import params
 from . import registry
 from . import templater
@@ -178,12 +179,20 @@ def handle_run(args):
         print("Parameter error: {0}".format(exc), file=sys.stderr)
         return EXIT_VALIDATION_ERROR
 
+    try:
+        output_path = output_manager.build_output_path(entry, params_values=override_map)
+    except output_manager.OutputError as exc:
+        print("Output error: {0}".format(exc), file=sys.stderr)
+        return EXIT_VALIDATION_ERROR
+    override_map["output"] = output_path
+
     print("Execution pipeline for '{0}' is not implemented yet.".format(program))
     print("Resolved parameters:")
     for name in entry.get("params", []):
         param_name = name["name"]
         value = override_map.get(param_name)
         print("  - {0}: {1}".format(param_name, value))
+    print("  - output: {0}".format(output_path))
     try:
         rendered_command = templater.render_command(
             entry,
@@ -195,6 +204,8 @@ def handle_run(args):
 
     print("Command preview:")
     print("  {0}".format(" ".join(rendered_command)))
+    print("Output path:")
+    print("  {0}".format(output_path))
     if args.dry_run:
         print("Dry run requested; command will not execute until Milestone M6.")
     return EXIT_SUCCESS

@@ -3,6 +3,21 @@ import textwrap
 import artctl.cli as cli
 
 
+class StubOutputPath:
+    def __init__(self, path):
+        self.path = path
+        self.calls = []
+
+    def __call__(self, entry, base_dir=None, now=None, params_values=None):
+        self.calls.append({
+            "entry": entry,
+            "base_dir": base_dir,
+            "now": now,
+            "params_values": params_values,
+        })
+        return self.path
+
+
 def write_registry(tmp_path):
     content = textwrap.dedent(
         """
@@ -60,24 +75,32 @@ def test_help_subcommand(tmp_path, capsys):
 
 def test_run_subcommand_reports_placeholder(tmp_path, capsys):
     write_registry(tmp_path)
-    exit_code = cli.main(
-        [
-            "--registry-path",
-            str(tmp_path),
-            "run",
-            "spiral",
-            "--dry-run",
-            "--set",
-            "turns=10",
-        ]
-    )
+    stub_output = StubOutputPath("/tmp/fixed/path.png")
+    original = cli.output_manager.build_output_path
+    cli.output_manager.build_output_path = stub_output
+    try:
+        exit_code = cli.main(
+            [
+                "--registry-path",
+                str(tmp_path),
+                "run",
+                "spiral",
+                "--dry-run",
+                "--set",
+                "turns=10",
+            ]
+        )
+    finally:
+        cli.output_manager.build_output_path = original
     captured = capsys.readouterr()
     assert exit_code == cli.EXIT_SUCCESS
     assert "Execution pipeline for 'spiral' is not implemented yet." in captured.out
     assert "Resolved parameters:" in captured.out
     assert "Dry run requested" in captured.out
     assert "turns: 10" in captured.out
+    assert "output: /tmp/fixed/path.png" in captured.out
     assert "python3 generators/spiral.py --turns 10" in captured.out
+    assert "Output path:\n  /tmp/fixed/path.png" in captured.out
 
 
 def test_help_for_unknown_program(tmp_path, capsys):
