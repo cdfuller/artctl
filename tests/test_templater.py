@@ -11,6 +11,7 @@ def build_entry():
         "command": [
             "python3",
             "{entrypoint}",
+            "--turns",
             "{params.turns}",
             "--output",
             "{output}",
@@ -32,11 +33,10 @@ def test_render_command_expands_placeholders(tmp_path):
     assert result == [
         "python3",
         "generators/spiral.py",
+        "--turns",
         "50",
         "--output",
         "out.png",
-        "--turns",
-        "50",
         "--color",
         "blue",
         "--preview",

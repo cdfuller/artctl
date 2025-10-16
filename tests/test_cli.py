@@ -99,7 +99,8 @@ def test_run_subcommand_reports_placeholder(tmp_path, capsys):
     assert "Dry run requested" in captured.out
     assert "turns: 10" in captured.out
     assert "output: /tmp/fixed/path.png" in captured.out
-    assert "python3 generators/spiral.py --turns 10" in captured.out
+    assert "python3 generators/spiral.py" in captured.out
+    assert "--turns 10" in captured.out
     assert "Output path:\n  /tmp/fixed/path.png" in captured.out
 
 

@@ -1,0 +1,28 @@
+name: spiral
+description: Generates a sample spiral PNG for demonstration.
+runtime: python
+entrypoint: generators/spiral.py
+command:
+  - python3
+  - generators/spiral.py
+  - --output
+  - "{output}"
+  - --turns
+  - "{params.turns}"
+  - --radius
+  - "{params.radius}"
+params:
+  - name: turns
+    type: int
+    default: 20
+    help: Number of spiral turns to simulate.
+  - name: radius
+    type: int
+    default: 400
+    help: Radius used for the spiral calculation.
+output:
+  required: true
+  extension: png
+tags:
+  - example
+  - python

@@ -22,22 +22,29 @@ def render_command(registry_entry, params_values, project_root=None):
 
     resolved = []
     params_inserted = False
+    consumed_params = set()
     for token in command_template:
         if token == "{params}":
-            resolved.extend(_render_params_flags(registry_entry, params_values))
+            resolved.extend(
+                _render_params_flags(registry_entry, params_values, consumed_params)
+            )
             params_inserted = True
             continue
 
         resolved.append(
-            _expand_token(token, registry_entry, params_values, project_root)
+            _expand_token(
+                token, registry_entry, params_values, project_root, consumed_params
+            )
         )
 
     if not params_inserted:
-        resolved.extend(_render_params_flags(registry_entry, params_values))
+        resolved.extend(
+            _render_params_flags(registry_entry, params_values, consumed_params)
+        )
     return resolved
 
 
-def _expand_token(token, registry_entry, params_values, project_root):
+def _expand_token(token, registry_entry, params_values, project_root, consumed):
     replacements = {
         "{project_root}": project_root,
         "{entrypoint}": registry_entry.get("entrypoint"),
@@ -63,17 +70,21 @@ def _expand_token(token, registry_entry, params_values, project_root):
                     param_name, token
                 )
             )
+        consumed.add(param_name)
         return str(params_values[param_name])
 
     return token
 
 
-def _render_params_flags(registry_entry, params_values):
+def _render_params_flags(registry_entry, params_values, consumed):
     flags = []
     for param in registry_entry.get("params", []):
         name = param["name"]
         param_type = param["type"]
         value = params_values.get(name)
+
+        if name in consumed:
+            continue
 
         if param_type == "bool":
             if value:

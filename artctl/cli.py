@@ -161,7 +161,7 @@ def handle_help(args):
 
 
 def handle_run(args):
-    """Validate registry entry prior to execution (implementation pending)."""
+    """Validate registry entry, render command, and execute the generator."""
     try:
         entries = registry.load_registry(args.registry_path)
     except registry.RegistryError as exc:
@@ -209,7 +209,7 @@ def handle_run(args):
     print("  {0}".format(output_path))
 
     if args.dry_run:
-        print("Dry run requested; command will not execute until Milestone M6.")
+        print("Dry run requested; command execution skipped.")
         return EXIT_SUCCESS
 
     try:
@@ -223,7 +223,6 @@ def handle_run(args):
         return EXIT_INTERNAL_ERROR
 
     print("Run completed successfully.")
-    return EXIT_SUCCESS
     return EXIT_SUCCESS
 
 
